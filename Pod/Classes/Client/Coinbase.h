@@ -23,6 +23,7 @@
 @class CoinbaseUser;
 @class CoinbaseToken;
 @class CoinbasePagingHelper;
+@class CoinbaseObject;
 
 /// HTTP methods for use with the Coinbase API.
 typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
@@ -33,21 +34,24 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
     CoinbaseRequestTypePostMultiPart
 };
 
-/// The `Coinbase` class is the interface to the Coinbase API. Create a `Coinbase` object using
-/// `coinbaseWithOAuthAccessToken:` or `coinbaseWithApiKey:secret:` to call API methods.
+/// Common response block for requests returning multiple @c CoinbaseObject objects.
+typedef void (^CoinbaseMultipleResultBlock)(NSArray<CoinbaseObject *> *, CoinbasePagingHelper *, NSError *); // CoinbaseError
+
+/// The @c Coinbase class is the interface to the Coinbase API. Create a @c Coinbase object using
+/// @c coinbaseWithOAuthAccessToken: or @c coinbaseWithApiKey:secret: to call API methods.
 @interface Coinbase : NSObject
 
 /// Create a Coinbase object for an OAuth access token. Please note that when this access token
 /// expires, requests made on this object will start failing with a 401 Unauthorized error. Obtain new tokens
 /// with your refresh token if this occurs.
-+ (Coinbase *)coinbaseWithOAuthAccessToken:(NSString *)accessToken;
++ (instancetype)coinbaseWithOAuthAccessToken:(NSString *)accessToken;
 
 /// Create a Coinbase object for an API key and secret.
-+ (Coinbase *)coinbaseWithApiKey:(NSString *)key
-                          secret:(NSString *)secret;
++ (instancetype)coinbaseWithApiKey:(NSString *)key
+                            secret:(NSString *)secret;
 
 /// Create a Coinbase object with no authentication. You can only use unauthenticated APIs with this client.
-+ (Coinbase *)unauthenticatedCoinbase;
++ (instancetype)unauthenticatedCoinbase;
 
 /// Base URL that will be used when making API requests. Defaults to "https://api.coinbase.com/"
 @property (nonatomic, strong) NSURL *baseURL;
@@ -55,66 +59,7 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 /// Set the API request's timeout interval. Defaults to 10 seconds.
 + (void)setRequestTimeoutInterval:(NSNumber *)timeoutInterval;
 
-/// Make a GET request to the Coinbase API.
-- (void)doGet:(NSString *)path
-   parameters:(NSDictionary *)parameters
-   completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a POST request to the Coinbase API.
-- (void)doPost:(NSString *)path
-    parameters:(NSDictionary *)parameters
-    completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a PUT request to the Coinbase API.
-- (void)doPut:(NSString *)path
-   parameters:(NSDictionary *)parameters
-   completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a DELETE request to the Coinbase API.
-- (void)doDelete:(NSString *)path
-      parameters:(NSDictionary *)parameters
-      completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a POST multipart request to the Coinbase API.
-- (void)doPostMultipart:(NSString *)path
-             parameters:(NSDictionary *)parameters
-             completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a GET request to the Coinbase API.
-- (void)doGet:(NSString *)path
-   parameters:(NSDictionary *)parameters
-      headers:(NSDictionary *)headers
-   completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a POST request to the Coinbase API.
-- (void)doPost:(NSString *)path
-    parameters:(NSDictionary *)parameters
-       headers:(NSDictionary *)headers
-    completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a PUT request to the Coinbase API.
-- (void)doPut:(NSString *)path
-   parameters:(NSDictionary *)parameters
-      headers:(NSDictionary *)headers
-   completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a DELETE request to the Coinbase API.
-- (void)doDelete:(NSString *)path
-      parameters:(NSDictionary *)parameters
-         headers:(NSDictionary *)headers
-      completion:(CoinbaseCompletionBlock)completion;
-
-/// Make a POST multipart request to the Coinbase API.
-- (void)doPostMultipart:(NSString *)path
-           parameters:(NSDictionary *)parameters
-              headers:(NSDictionary *)headers
-           completion:(CoinbaseCompletionBlock)completion;
-
-- (void)doRequestType:(CoinbaseRequestType)type
-                 path:(NSString *)path
-           parameters:(NSDictionary *)parameters
-           completion:(CoinbaseCompletionBlock)completion;
-
+/// Make request
 - (void)doRequestType:(CoinbaseRequestType)type
                  path:(NSString *)path
            parameters:(NSDictionary *)parameters
@@ -126,13 +71,12 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 ///
 /// List accounts - Authenticated resource that returns the user’s active accounts.
 ///
-
--(void) getAccountsList:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+- (void)getAccountsList:(CoinbaseMultipleResultBlock)callback;
 
 -(void) getAccountsListWithPage:(NSUInteger)page
                           limit:(NSUInteger)limit
                     allAccounts:(BOOL)allAccounts
-                     completion:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+                     completion:(CoinbaseMultipleResultBlock)callback;
 
 ///
 // Show an account - Authenticated resource that returns one of user’s active accounts.
@@ -196,39 +140,39 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 ///
 
 -(void) createButtonWithName:(NSString *)name
-                      price:(NSString *)price
-           priceCurrencyISO:(NSString *)priceCurrencyISO
-                 completion:(void(^)(CoinbaseButton*, NSError*))callback;
+                       price:(NSString *)price
+            priceCurrencyISO:(NSString *)priceCurrencyISO
+                  completion:(void(^)(CoinbaseButton*, NSError*))callback;
 
 -(void) createButtonWithName:(NSString *)name
-                      price:(NSString *)price
-           priceCurrencyISO:(NSString *)priceCurrencyISO
-                  accountID:(NSString *)accountID
-                       type:(NSString *)type
-               subscription:(BOOL)subscription
-                     repeat:(NSString *)repeat
-                      style:(NSString *)style
-                       text:(NSString *)text
-                description:(NSString *)description
-                     custom:(NSString *)custom
-               customSecure:(BOOL)customSecure
-                callbackURL:(NSString *)callbackURL
-                 successURL:(NSString *)successURL
-                  cancelURL:(NSString *)cancelURL
-                    infoURL:(NSString *)infoURL
-               autoRedirect:(BOOL)autoRedirect
-        autoRedirectSuccess:(BOOL)autoRedirectSuccess
-         autoRedirectCancel:(BOOL)autoRedirectCancel
-              variablePrice:(BOOL)variablePrice
-             includeAddress:(BOOL)includeAddress
-               includeEmail:(BOOL)includeEmail
-                choosePrice:(BOOL)choosePrice
-                     price1:(NSString *)price1
-                     price2:(NSString *)price2
-                     price3:(NSString *)price3
-                     price4:(NSString *)price4
-                     price5:(NSString *)price5
-                 completion:(void(^)(CoinbaseButton*, NSError*))callback;
+                       price:(NSString *)price
+            priceCurrencyISO:(NSString *)priceCurrencyISO
+                   accountID:(NSString *)accountID
+                        type:(NSString *)type
+                subscription:(BOOL)subscription
+                      repeat:(NSString *)repeat
+                       style:(NSString *)style
+                        text:(NSString *)text
+                 description:(NSString *)description
+                      custom:(NSString *)custom
+                customSecure:(BOOL)customSecure
+                 callbackURL:(NSString *)callbackURL
+                  successURL:(NSString *)successURL
+                   cancelURL:(NSString *)cancelURL
+                     infoURL:(NSString *)infoURL
+                autoRedirect:(BOOL)autoRedirect
+         autoRedirectSuccess:(BOOL)autoRedirectSuccess
+          autoRedirectCancel:(BOOL)autoRedirectCancel
+               variablePrice:(BOOL)variablePrice
+              includeAddress:(BOOL)includeAddress
+                includeEmail:(BOOL)includeEmail
+                 choosePrice:(BOOL)choosePrice
+                      price1:(NSString *)price1
+                      price2:(NSString *)price2
+                      price3:(NSString *)price3
+                      price4:(NSString *)price4
+                      price5:(NSString *)price5
+                  completion:(void(^)(CoinbaseButton*, NSError*))callback;
 
 ///
 /// Show a button - Authenticated resource which lets you retrieve an individual button.
@@ -267,12 +211,12 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 /// Required scope: contacts
 ///
 
--(void) getContacts:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+-(void) getContacts:(CoinbaseMultipleResultBlock)callback;
 
 -(void) getContactsWithPage:(NSUInteger)page
                       limit:(NSUInteger)limit
                       query:(NSString *)query
-                 completion:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+                 completion:(CoinbaseMultipleResultBlock)callback;
 
 #pragma mark - Currencies
 
@@ -307,11 +251,11 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 /// Required scope: oauth_apps
 ///
 
--(void) getOAuthApplications:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+-(void) getOAuthApplications:(CoinbaseMultipleResultBlock)callback;
 
 -(void) getOAuthApplicationsWithPage:(NSUInteger)page
                                limit:(NSUInteger)limit
-                          completion:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+                          completion:(CoinbaseMultipleResultBlock)callback;
 
 ///
 /// Show an OAuth application - Show an individual OAuth application you have created.
@@ -336,12 +280,12 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 /// Required scope: orders or merchant
 ///
 
--(void) getOrders:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+-(void) getOrders:(CoinbaseMultipleResultBlock)callback;
 
 -(void) getOrdersWithPage:(NSUInteger)page
                     limit:(NSUInteger)limit
                 accountID:(NSString *)accountID
-               completion:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+               completion:(CoinbaseMultipleResultBlock)callback;
 
 ///
 /// Create an order - Authenticated resource which returns an order for a new button.
@@ -458,11 +402,11 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 /// Required scope: recurring_payments or merchant
 ///
 
--(void) getRecurringPayments:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+-(void) getRecurringPayments:(CoinbaseMultipleResultBlock)callback;
 
 -(void) getRecurringPaymentsWithPage:(NSUInteger)page
                                limit:(NSUInteger)limit
-                          completion:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+                          completion:(CoinbaseMultipleResultBlock)callback;
 
 ///
 /// Show a recurring payment - Authenticated resource that lets you show an individual recurring payment.
@@ -480,7 +424,7 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 ///
 
 -(void) refundWithID:(NSString *)refundID
-          completion:(void(^)(CoinbaseRefund*, NSError*))callback; 
+          completion:(void(^)(CoinbaseRefund*, NSError*))callback;
 
 #pragma mark - Reports
 
@@ -489,11 +433,11 @@ typedef NS_ENUM(NSUInteger, CoinbaseRequestType) {
 /// Required scope: reports
 ///
 
--(void) getReports:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+-(void) getReports:(CoinbaseMultipleResultBlock)callback;
 
 -(void) getReportsWithPage:(NSUInteger)page
                      limit:(NSUInteger)limit
-                completion:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+                completion:(CoinbaseMultipleResultBlock)callback;
 
 ///
 /// Show a report - Authenticated resource which returns report details.
@@ -550,10 +494,10 @@ agreeBTCAmountVaries:(BOOL)agreeBTCAmountVaries
 /// Required scopes: recurring_payments or merchant
 ///
 
--(void) getSubscribers:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+-(void) getSubscribers:(CoinbaseMultipleResultBlock)callback;
 
 -(void) getSubscribersWithAccountID:(NSString *)accountID
-                         completion:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+                         completion:(CoinbaseMultipleResultBlock)callback;
 
 ///
 /// Show a subscription - Authenticated resource that lets you (as a merchant) show an individual subscription than a customer has created with you.
@@ -614,12 +558,12 @@ agreeBTCAmountVaries:(BOOL)agreeBTCAmountVaries
 /// Required scope: transfers
 ///
 
--(void) getTransfers:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+-(void) getTransfers:(CoinbaseMultipleResultBlock)callback;
 
 -(void) getTransfersWithPage:(NSUInteger)page
                        limit:(NSUInteger)limit
                    accountID:(NSString *)accountID
-                  completion:(void(^)(NSArray*, CoinbasePagingHelper*, NSError*))callback;
+                  completion:(CoinbaseMultipleResultBlock)callback;
 
 ///
 /// Show a transfer - Authenticated resource which returns a tranfer (a bitcoin purchase or sell).
