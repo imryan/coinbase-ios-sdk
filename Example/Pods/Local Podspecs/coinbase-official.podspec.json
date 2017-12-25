@@ -1,6 +1,6 @@
 {
   "name": "coinbase-official",
-  "version": "3.2.5",
+  "version": "3.3.0",
   "summary": "Integrate bitcoin into your iOS application.",
   "description": "Integrate bitcoin into your iOS application with Coinbase's fully featured bitcoin payments API. Coinbase allows all major operations in bitcoin through one API. For more information, visit https://coinbase.com/docs/api/overview.",
   "homepage": "https://github.com/coinbase/coinbase-ios-sdk",
@@ -10,7 +10,7 @@
   },
   "source": {
     "git": "https://github.com/coinbase/coinbase-ios-sdk.git",
-    "tag": "3.2.5"
+    "tag": "3.3.0"
   },
   "social_media_url": "https://twitter.com/coinbase",
   "platforms": {
